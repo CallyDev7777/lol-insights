@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LoL Insights</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0e1a;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #c89b3c;
+      margin-bottom: 2rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .search-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar input {
+      background: #1a2035;
+      border: 1px solid #2d3748;
+      color: #e2e8f0;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 200px;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: #c89b3c;
+    }
+
+    .search-bar button {
+      background: #c89b3c;
+      color: #0a0e1a;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .search-bar button:hover { background: #e0b84a; }
+
+    .refresh-btn {
+      display: none;
+      margin: 0 auto 1.5rem;
+      background: transparent;
+      border: 1px solid #c89b3c;
+      color: #c89b3c;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover { background: #c89b3c; color: #0a0e1a; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1a2035;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card h2 {
+      color: #c89b3c;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #2d3748;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Summoner card */
+    .summoner-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid #c89b3c;
+      display: block;
+      margin: 0 auto 1rem;
+    }
+
+    .summoner-name {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .summoner-level {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Ranked card */
+    .rank-badge {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #0a0e1a;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .rank-emblem {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+
+    .rank-info .tier {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #c89b3c;
+    }
+
+    .rank-info .lp { font-size: 0.85rem; color: #94a3b8; }
+
+    .winrate-bar-container {
+      margin-top: 0.75rem;
+    }
+
+    .winrate-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.25rem;
+    }
+
+    .winrate-bar {
+      height: 8px;
+      background: #2d3748;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .winrate-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #48bb78, #c89b3c);
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* Match history */
+    .match {
+      display: grid;
+      grid-template-columns: 48px 1fr auto auto auto;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid transparent;
+    }
+
+    .match.win { background: #0d2137; border-left-color: #48bb78; }
+    .match.loss { background: #1f0d0d; border-left-color: #fc8181; }
+
+    .champion-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #2d3748;
+    }
+
+    .match-champion { font-weight: bold; font-size: 0.95rem; }
+    .match-result { font-size: 0.8rem; color: #94a3b8; }
+
+    .kda { font-size: 0.95rem; text-align: center; }
+    .kda span { color: #94a3b8; }
+
+    .match-outcome {
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    .win .match-outcome { color: #48bb78; }
+    .loss .match-outcome { color: #fc8181; }
+
+    .match-duration { font-size: 0.8rem; color: #94a3b8; text-align: right; }
+
+    .error { color: #fc8181; text-align: center; padding: 1rem; }
+    .loading { text-align: center; color: #94a3b8; padding: 2rem; }
+
+    #results { display: none; }
+  </style>
+</head>
+<body>
+
+<h1>⚔️ LoL Insights</h1>
+
+<div class="search-bar">
+  <input type="text" id="gameName" placeholder="Game Name" />
+  <input type="text" id="tagLine" placeholder="EUW" />
+  <button onclick="search()">Search</button>
+</div>
+
+<button class="refresh-btn" id="refreshBtn" onclick="search(true)">🔄 Force Refresh</button>
+
+<div id="loading" class="loading" style="display:none">Loading summoner data...</div>
+<div id="error" class="error" style="display:none"></div>
+
+<div id="results">
+  <div class="grid">
+
+    <!-- Left column -->
+    <div>
+      <div class="card" id="summonerCard">
+        <h2>Summoner</h2>
+        <img id="summonerIconImg" class="summoner-icon" src="" alt="icon"/>
+        <div class="summoner-name" id="summonerName"></div>
+        <div class="summoner-level" id="summonerLevel"></div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem" id="rankedCard">
+        <h2>Ranked</h2>
+        <div id="rankedContent"></div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="card">
+      <h2>Recent Matches</h2>
+      <div id="matchesContent"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const DDRAGON = "https://ddragon.leagueoflegends.com/cdn/14.24.1";
+  let currentSearch = null;
+
+  async function search(forceRefresh = false) {
+    const gameName = document.getElementById('gameName').value.trim();
+    const tagLine = document.getElementById('tagLine').value.trim();
+
+    if (!gameName || !tagLine) {
+      showError('Please enter both a game name and tag line');
+      return;
+    }
+
+    currentSearch = { gameName, tagLine };
+    const refresh = forceRefresh ? '?refresh=true' : '';
+
+    showLoading();
+
+    try {
+        const name = encodeURIComponent(gameName);
+        const tag = encodeURIComponent(tagLine);
+
+        const [summonerRes, rankedRes, matchesRes] = await Promise.all([
+        fetch(`/summoner/${name}/${tag}${refresh}`),
+        fetch(`/summoner/${name}/${tag}/ranked${refresh}`),
+        fetch(`/summoner/${name}/${tag}/matches${refresh}`)
+        ]);
+
+      if (!summonerRes.ok) throw new Error('Summoner not found');
+
+      const summoner = await summonerRes.json();
+      const ranked = await rankedRes.json();
+      const matches = await matchesRes.json();
+
+      renderSummoner(summoner, gameName, tagLine);
+      renderRanked(ranked);
+      renderMatches(matches);
+
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('refreshBtn').style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  function renderSummoner(data, gameName, tagLine) {
+    const iconUrl = `${DDRAGON}/img/profileicon/${data.profile_icon_id}.png`;
+    document.getElementById('summonerIconImg').src = iconUrl;
+    document.getElementById('summonerName').textContent = `${gameName}#${tagLine}`;
+    document.getElementById('summonerLevel').textContent = `Level ${data.level}`;
+  }
+
+  function renderRanked(data) {
+    const container = document.getElementById('rankedContent');
+    if (!data.length) {
+      container.innerHTML = '<p style="color:#94a3b8;text-align:center">Unranked</p>';
+      return;
+    }
+
+    const tierColors = {
+      IRON: '#6b7280', BRONZE: '#92400e', SILVER: '#94a3b8',
+      GOLD: '#c89b3c', PLATINUM: '#22d3ee', EMERALD: '#10b981',
+      DIAMOND: '#818cf8', MASTER: '#a855f7', GRANDMASTER: '#ef4444', CHALLENGER: '#f59e0b'
+    };
+
+    container.innerHTML = data.map(entry => {
+      const total = entry.wins + entry.losses;
+      const wr = total > 0 ? Math.round((entry.wins / total) * 100) : 0;
+      const color = tierColors[entry.tier] || '#c89b3c';
+      const queueLabel = entry.queue_type === 'RANKED_SOLO_5x5' ? 'Solo/Duo' : 'Flex';
+      const tierImg = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-shared-components/global/default/${entry.tier.toLowerCase()}.png`;
+
+      return `
+        <div class="rank-badge">
+          <img class="rank-emblem" src="${tierImg}" alt="${entry.tier}"
+            onerror="this.style.display='none'"/>
+          <div class="rank-info">
+            <div class="tier" style="color:${color}">${entry.tier} ${entry.rank}</div>
+            <div class="lp">${entry.league_points} LP · ${queueLabel}</div>
+            <div class="lp">${entry.wins}W ${entry.losses}L</div>
+          </div>
+        </div>
+        <div class="winrate-bar-container">
+          <div class="winrate-label">
+            <span>Win Rate</span>
+            <span>${wr}%</span>
+          </div>
+          <div class="winrate-bar">
+            <div class="winrate-fill" style="width:${wr}%"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderMatches(matches) {
+    const container = document.getElementById('matchesContent');
+    container.innerHTML = matches.map(m => {
+      const champImg = `${DDRAGON}/img/champion/${m.champion}.png`;
+      return `
+        <div class="match ${m.win ? 'win' : 'loss'}">
+          <img class="champion-icon" src="${champImg}" alt="${m.champion}"
+            onerror="this.src='https://ddragon.leagueoflegends.com/cdn/img/champion/tiles/Lux_0.jpg'"/>
+          <div>
+            <div class="match-champion">${m.champion}</div>
+            <div class="match-result">${m.game_duration_minutes} min</div>
+          </div>
+          <div class="kda">${m.kills}<span>/</span>${m.deaths}<span>/</span>${m.assists}</div>
+          <div class="match-outcome">${m.win ? 'WIN' : 'LOSS'}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function showLoading() {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('error').style.display = 'none';
+    document.getElementById('results').style.display = 'none';
+  }
+
+  function showError(msg) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').textContent = `Error: ${msg}`;
+  }
+
+  // Allow pressing Enter to search
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') search();
+  });
+</script>
+</body>
+</html>

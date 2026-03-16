@@ -3,10 +3,17 @@ from app import riot_client, cache
 from app.models import SummonerProfile, RankedInfo, MatchSummary
 from typing import List
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 load_dotenv()
 
 app = FastAPI(title="LoL Insights API", version="1.0.0")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+@app.get("/")
+async def serve_frontend():
+    return FileResponse("app/static/index.html")
 
 @app.get("/health")
 async def health_check():
