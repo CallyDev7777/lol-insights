@@ -38,14 +38,22 @@ Provisioned entirely with Terraform:
 - GKE Autopilot cluster (London region)
 - GCP Artifact Registry for Docker images
 
+## Prerequisites
+
+- Docker Desktop
+- Google Cloud SDK
+- Terraform
+- A Riot Games API key from [developer.riotgames.com](https://developer.riotgames.com)
+- A GCP account with billing enabled
+
 ## Running Locally
 ```bash
 git clone https://github.com/CallyDev7777/lol-insights.git
 cd lol-insights
 
-# Add your Riot API key
+# Create your .env file (never commit this)
 cp .env.example .env
-# Edit .env with your RIOT_API_KEY from developer.riotgames.com
+# Edit .env and add your RIOT_API_KEY
 
 docker compose up --build
 ```
@@ -53,17 +61,39 @@ docker compose up --build
 Visit `http://localhost:8000`
 
 ## Kubernetes Deployment
+
+### 1. Provision infrastructure
 ```bash
-# Provision infrastructure
 cd terraform
 terraform init
 terraform apply
+```
 
-# Push Docker image
-docker build -t europe-west2-docker.pkg.dev/YOUR_PROJECT/lol-insights/api:v1 .
-docker push europe-west2-docker.pkg.dev/YOUR_PROJECT/lol-insights/api:v1
+### 2. Push Docker image
+```bash
+gcloud auth configure-docker europe-west2-docker.pkg.dev
 
-# Deploy to GKE
+docker build -t europe-west2-docker.pkg.dev/YOUR_PROJECT_ID/lol-insights/api:v1 .
+docker push europe-west2-docker.pkg.dev/YOUR_PROJECT_ID/lol-insights/api:v1
+```
+
+### 3. Create your secrets file
+
+`kubernetes/secret.yaml` is intentionally excluded from this repository. You must create it yourself before deploying:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lol-insights-secret
+type: Opaque
+stringData:
+  RIOT_API_KEY: "your-riot-api-key-here"
+```
+
+Never commit this file to version control.
+
+### 4. Deploy to Kubernetes
+```bash
 gcloud container clusters get-credentials lol-insights-cluster --region europe-west2
 kubectl apply -f kubernetes/
 ```
@@ -84,7 +114,7 @@ lol-insights/
 │   ├── ingress.yaml     # GCP load balancer
 │   ├── redis.yaml       # Redis deployment + service
 │   ├── configmap.yaml   # Non-secret config
-│   └── secret.yaml      # Riot API key (encrypted)
+│   └── secret.yaml      # Not committed - create manually (see above)
 ├── terraform/
 │   ├── main.tf          # GCP resources
 │   ├── variables.tf     # Input variables
@@ -103,3 +133,5 @@ lol-insights/
 **GKE Autopilot** — Nodes managed by GCP, reducing operational overhead while maintaining full Kubernetes API compatibility.
 
 **2 replicas** — Ensures availability during rolling deployments with zero downtime.
+
+**Secrets management** — Sensitive values are kept out of version control entirely. Kubernetes Secrets are created manually before deployment.
