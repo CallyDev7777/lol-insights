@@ -27,3 +27,4 @@ class MatchSummary(BaseModel):
     assists: int
     win: bool
     game_duration_minutes: int
+    game_mode: str

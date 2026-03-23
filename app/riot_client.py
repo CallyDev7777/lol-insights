@@ -46,7 +46,7 @@ async def get_ranked_info(puuid: str) -> List[RankedInfo]:
             for entry in data
         ]
 
-async def get_recent_matches(puuid: str, count: int = 5) -> List[MatchSummary]:
+async def get_recent_matches(puuid: str, count: int = 15) -> List[MatchSummary]:
     url = f"{REGIONAL_URL}/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}"
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=HEADERS)
@@ -72,6 +72,7 @@ async def get_recent_matches(puuid: str, count: int = 5) -> List[MatchSummary]:
                 deaths=participant["deaths"],
                 assists=participant["assists"],
                 win=participant["win"],
-                game_duration_minutes=round(match_data["info"]["gameDuration"] / 60)
+                game_duration_minutes=round(match_data["info"]["gameDuration"] / 60),
+                game_mode=match_data["info"]["gameMode"]
             ))
         return matches

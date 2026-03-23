@@ -358,6 +358,17 @@
     }).join('');
   }
 
+  function getGameMode(mode) {
+  const modes = {
+    'CLASSIC': 'Summoner\'s Rift',
+    'ARAM': 'ARAM',
+    'CHERRY': 'Arena',
+    'URF': 'URF',
+    'TUTORIAL': 'Tutorial'
+  };
+  return modes[mode] || mode;
+  }
+
   function renderMatches(matches) {
     const container = document.getElementById('matchesContent');
     container.innerHTML = matches.map(m => {
@@ -368,7 +379,7 @@
             onerror="this.src='https://ddragon.leagueoflegends.com/cdn/img/champion/tiles/Lux_0.jpg'"/>
           <div>
             <div class="match-champion">${m.champion}</div>
-            <div class="match-result">${m.game_duration_minutes} min</div>
+            <div class="match-result">${getGameMode(m.game_mode)} · ${m.game_duration_minutes} min</div>
           </div>
           <div class="kda">${m.kills}<span>/</span>${m.deaths}<span>/</span>${m.assists}</div>
           <div class="match-outcome">${m.win ? 'WIN' : 'LOSS'}</div>
