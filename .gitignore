@@ -5,3 +5,7 @@ __pycache__/
 *.egg-info/
 dist/
 .venv/
+kubernetes/secret.yaml
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
