@@ -1,19 +1,19 @@
-# ⚔️ LoL Insights
+# LoL Insights
 
 A production-grade League of Legends stats platform built to demonstrate real platform engineering skills across the full infrastructure stack.
 
-## 🏗️ Architecture
+## Architecture
 ```
-Internet → GCP Load Balancer → Kubernetes Ingress
-                                      ↓
-                            2x FastAPI API Pods
-                                      ↓
-                              Redis Cache Pod
-                                      ↓
-                              Riot Games API
+Internet -> GCP Load Balancer -> Kubernetes Ingress
+                                        ↓
+                              2x FastAPI API Pods
+                                        ↓
+                                Redis Cache Pod
+                                        ↓
+                                Riot Games API
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Python, FastAPI
 - **Caching:** Redis (cache-aside pattern)
@@ -23,7 +23,7 @@ Internet → GCP Load Balancer → Kubernetes Ingress
 - **Cloud:** Google Cloud Platform (europe-west2)
 - **Registry:** GCP Artifact Registry
 
-## ✨ Features
+## Features
 
 - Summoner profile lookup with profile icon
 - Ranked stats with tier badge and win rate bar
@@ -31,16 +31,15 @@ Internet → GCP Load Balancer → Kubernetes Ingress
 - Redis caching with force-refresh capability
 - Runs with 2 replicas and zero-downtime rolling deployments
 
-## 🚀 Infrastructure
+## Infrastructure
 
 Provisioned entirely with Terraform:
 - VPC network and subnets
 - GKE Autopilot cluster (London region)
 - GCP Artifact Registry for Docker images
 
-## 🐳 Running Locally
+## Running Locally
 ```bash
-# Clone the repo
 git clone https://github.com/CallyDev7777/lol-insights.git
 cd lol-insights
 
@@ -48,13 +47,12 @@ cd lol-insights
 cp .env.example .env
 # Edit .env with your RIOT_API_KEY from developer.riotgames.com
 
-# Start with Docker Compose
 docker compose up --build
 ```
 
 Visit `http://localhost:8000`
 
-## ☸️ Kubernetes Deployment
+## Kubernetes Deployment
 ```bash
 # Provision infrastructure
 cd terraform
@@ -70,7 +68,7 @@ gcloud container clusters get-credentials lol-insights-cluster --region europe-w
 kubectl apply -f kubernetes/
 ```
 
-## 📁 Project Structure
+## Project Structure
 ```
 lol-insights/
 ├── app/
@@ -96,7 +94,7 @@ lol-insights/
 └── requirements.txt     # Python dependencies
 ```
 
-## 🔑 Key Engineering Decisions
+## Key Engineering Decisions
 
 **Cache-aside pattern** — API responses cached in Redis for 5 minutes to handle Riot's dev key rate limits (100 req/2min). Force-refresh endpoint bypasses cache when needed.
 
