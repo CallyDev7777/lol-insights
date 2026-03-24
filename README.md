@@ -126,12 +126,12 @@ lol-insights/
 
 ## Key Engineering Decisions
 
-**Cache-aside pattern** — API responses cached in Redis for 5 minutes to handle Riot's dev key rate limits (100 req/2min). Force-refresh endpoint bypasses cache when needed.
+**Cache-aside pattern** - API responses cached in Redis for 5 minutes to handle Riot's dev key rate limits (100 req/2min). Force-refresh endpoint bypasses cache when needed.
 
-**Multi-stage Docker build** — Separate builder and runtime stages keep the final image lean.
+**Multi-stage Docker build** - Separate builder and runtime stages keep the final image lean.
 
-**GKE Autopilot** — Nodes managed by GCP, reducing operational overhead while maintaining full Kubernetes API compatibility.
+**GKE Autopilot** - Nodes managed by GCP, reducing operational overhead while maintaining full Kubernetes API compatibility.
 
-**2 replicas** — Ensures availability during rolling deployments with zero downtime.
+**2 replicas** - Ensures availability during rolling deployments with zero downtime.
 
-**Secrets management** — Sensitive values are kept out of version control entirely. Kubernetes Secrets are created manually before deployment.
+**Secrets management** - Sensitive values are kept out of version control entirely. Kubernetes Secrets are created manually before deployment.
