@@ -10,48 +10,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Authenticate with GCP using our service account key
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Step 3: Set up gcloud CLI
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 4: Configure Docker to push to GCP Artifact Registry
       - name: Configure Docker for GCP
         run: gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
 
-      # Step 5: Build Docker image, tagged with the git commit SHA
-      # This means every deployment is traceable to an exact commit
       - name: Build Docker image
         run: |
           docker build -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lol-insights/api:${{ github.sha }} .
           docker tag europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lol-insights/api:${{ github.sha }} \
             europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lol-insights/api:latest
 
-      # Step 6: Push both the commit-tagged and latest images
       - name: Push Docker image
         run: |
           docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lol-insights/api:${{ github.sha }}
           docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lol-insights/api:latest
 
-      # Step 7: Connect to our GKE cluster
       - name: Connect to GKE
         uses: google-github-actions/get-gke-credentials@v1
         with:
           cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
           location: europe-west2
+      
+      - name: Update Riot API secret
+        run: |
+          kubectl create secret generic lol-insights-secret \
+            --from-literal=RIOT_API_KEY=${{ secrets.RIOT_API_KEY }} \
+            --dry-run=client -o yaml | kubectl apply -f -
 
-      # Step 8: Update the deployment to use the new image and roll it out
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/lol-insights-api \
