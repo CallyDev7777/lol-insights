@@ -77,22 +77,7 @@ docker build -t europe-west2-docker.pkg.dev/YOUR_PROJECT_ID/lol-insights/api:v1 
 docker push europe-west2-docker.pkg.dev/YOUR_PROJECT_ID/lol-insights/api:v1
 ```
 
-### 3. Create your secrets file
-
-`kubernetes/secret.yaml` is intentionally excluded from this repository. You must create it yourself before deploying:
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: lol-insights-secret
-type: Opaque
-stringData:
-  RIOT_API_KEY: "your-riot-api-key-here"
-```
-
-Never commit this file to version control.
-
-### 4. Deploy to Kubernetes
+### 3. Deploy to Kubernetes
 ```bash
 gcloud container clusters get-credentials lol-insights-cluster --region europe-west2
 kubectl apply -f kubernetes/
@@ -134,4 +119,4 @@ lol-insights/
 
 **2 replicas** - Ensures availability during rolling deployments with zero downtime.
 
-**Secrets management** - Sensitive values are kept out of version control entirely. Kubernetes Secrets are created manually before deployment.
+**Secrets management** - Sensitive values are kept out of version control entirely. Github Action Secrets are created manually before deployment, so ensure you have your secret variables setup.

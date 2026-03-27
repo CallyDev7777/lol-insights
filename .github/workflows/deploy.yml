@@ -43,7 +43,7 @@ jobs:
           cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
           location: europe-west2
       
-      - name: Update Riot API secret
+      - name: Pull Riot API secret
         run: |
           kubectl create secret generic lol-insights-secret \
             --from-literal=RIOT_API_KEY=${{ secrets.RIOT_API_KEY }} \
